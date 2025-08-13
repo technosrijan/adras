@@ -29,6 +29,9 @@ app.add_middleware(
 async def health() -> Dict[str, str]:
     return {"status": "ok"}
 
+@app.get("/")
+async def root():
+    return {"message": "Adras API is running"}
 
 @app.post("/api/")
 async def analyze(request: Request, background_tasks: BackgroundTasks):
