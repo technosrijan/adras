@@ -29,7 +29,7 @@ app.add_middleware(
 async def health() -> Dict[str, str]:
     return {"status": "ok"}
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def root():
     return {"message": "Adras API is running"}
 
