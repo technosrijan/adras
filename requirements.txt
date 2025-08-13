@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pandas
+python-dotenv
+groq
+requests
+matplotlib
+lxml
+beautifulsoup4
+scikit-learn
+duckdb
+seaborn
+numpy
+python-multipart
