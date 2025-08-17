@@ -118,7 +118,7 @@ def external_pipeline(req_id):
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": question}
     ]
-    max_iterations = 7
+    max_iterations = 5
     clean_stdout = ""
     iteration = 0
     while iteration < max_iterations:
