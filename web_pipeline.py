@@ -52,6 +52,65 @@ def extract_python_code(text):
             text = text[:-3]
     return text.strip()
 
+def extract_json(text: str) -> str:
+	if not text:
+		return text
+
+	start_idx: int | None = None
+	stack: list[str] = []
+
+	in_string = False
+	quote_char = ''  # either ' or " when inside a string
+	escape = False   # only relevant when inside a string
+
+	for i, ch in enumerate(text):
+		# If we haven't started capturing, look for the first opening brace/bracket.
+		if start_idx is None:
+			if ch == '{' or ch == '[':
+				start_idx = i
+				stack.append(ch)
+			# ignore everything until we see the first '{' or '['
+			continue
+
+		# We have started capturing inside a potential JSON fragment.
+		if in_string:
+			if escape:
+				# current char is escaped; consume and reset
+				escape = False
+			else:
+				if ch == '\\':
+					escape = True
+				elif ch == quote_char:
+					in_string = False
+			continue
+
+		# Not in a string within the captured fragment
+		if ch == '"' or ch == "'":
+			in_string = True
+			quote_char = ch
+			continue
+
+		if ch == '{' or ch == '[':
+			stack.append(ch)
+			continue
+
+		if ch == '}' or ch == ']':
+			if not stack:
+				# Unbalanced close; return best-effort slice
+				return text[start_idx:i + 1]
+			open_ch = stack.pop()
+			if (open_ch == '{' and ch != '}') or (open_ch == '[' and ch != ']'):
+				# Mismatched pair; cannot reliably extract – return original text
+				return text
+			if not stack:
+				# Completed the outermost object/array
+				return text[start_idx:i + 1]
+
+		# otherwise, keep scanning
+
+	# Reached end without closing the outermost structure – return original
+	return text
+
 def run_code(code):
     try:
         result = subprocess.run(
@@ -86,6 +145,7 @@ You must:
     •	Return only the Python code, with no explanation or markdown formatting.
     •	When working with large datasets, never load the entire dataset into memory. Only load the necessary columns or rows.
     •	When a task includes specific instructions for visualizations (e.g., "use a dotted red line", "label axes", "keep image size under 100kB"), follow them **exactly**. Do not ignore stylistic or formatting requests, especially for plots.
+    •	Always end your code with: import json; print(json.dumps(final_output)), where final_output is the answer in the requested format. Never use print(final_output) directly.
 """
 
 def web_pipeline(req_id):
@@ -102,6 +162,7 @@ def web_pipeline(req_id):
     ]
     max_iterations = 10
     iteration = 0
+    stdout=""
     while iteration < max_iterations:
         iteration += 1
         print(f"\n=== Iteration {iteration} ===")
@@ -118,7 +179,7 @@ def web_pipeline(req_id):
             messages.append({"role": "user", "content": "Output = " + replace_base64(stdout) + "\nErrors = " + stderr})
             
     print("Max iterations reached. Task failed.")
-    return fail_proof(stdout, question)
+    return json.loads(fail_proof(stdout, question))
 
 def stub_response_former(question):
     #use an llm to generate a any answer for the given question but in the exact format requested. if it can give correct answer great, but if it cant it must only respond with a fake answer but in the exact same format as asked in the question. this is a fallback option.
@@ -138,13 +199,14 @@ def stub_response_former(question):
         model="meta-llama/llama-4-scout-17b-16e-instruct",
         temperature=0,
     )
-    fake_json=json.loads(response.choices[0].message.content)
+    fake_json=json.loads(extract_json(response.choices[0].message.content))
     return json.dumps(fake_json)
 
 def fail_proof(stdout,question):
-    # If stdout is valid json return stdout
+    if not stdout:
+        return stub_response_former(question)
     try:
-        json.loads(stdout)
-        return stdout
-    except json.JSONDecodeError:
+        json.loads(extract_json(stdout))
+        return extract_json(stdout)
+    except Exception:
         return stub_response_former(question)

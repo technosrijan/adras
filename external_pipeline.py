@@ -1,3 +1,4 @@
+import json
 import os
 from groq import Groq
 from dotenv import load_dotenv
@@ -117,7 +118,8 @@ def external_pipeline(req_id):
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": question}
     ]
-    max_iterations = 8
+    max_iterations = 7
+    clean_stdout = ""
     iteration = 0
     while iteration < max_iterations:
         iteration += 1
@@ -136,5 +138,5 @@ def external_pipeline(req_id):
             messages.append({"role": "user", "content": "Output = " + replace_base64(clean_stdout) + "\nErrors = " + stderr})
             continue
     print("Max iterations reached. Task failed.")
-    return fail_proof(clean_stdout, question)
+    return json.loads(fail_proof(clean_stdout, question))
 

@@ -186,5 +186,5 @@ def file_pipeline(req_id: str):
             json_result = extract_json_from_text(stdout)
             if json_result is not None:
                 return json_result
-            return fail_proof(stdout, question)
+            return json.loads(fail_proof(stdout, question))
 
