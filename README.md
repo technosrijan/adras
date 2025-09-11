@@ -1,18 +1,14 @@
 # Adras — Autonomous Data Analyst API ⚡
 
+Adras is a completetly autonomous multimodal data analyst agent that can scrape data from html websites, csv files, and external buckets to solve complex natural language data analysis queries.
+
 FastAPI service that turns natural-language analysis requests into executable Python, runs them, and returns structured results.
 
-- Web scraping and analysis (web lane)
-- File-based analysis for uploaded datasets (file lane)
-- External data/API analysis (external lane)
-- Automatic lane selection via an LLM classifier
 
-Quick links:
-- API entrypoint: [main.py](main.py)
-- Classifier: [`splitter.classify_from_req_id`](splitter.py)
-- Pipelines: [`web_pipeline.web_pipeline`](web_pipeline.py), [`file_pipeline.file_pipeline`](file_pipeline.py), [`external_pipeline.external_pipeline`](external_pipeline.py)
-- Scraper helper: [`scraper.scrape`](scraper.py)
-- CI/CD workflow: [.github/workflows/main_adras.yml](.github/workflows/main_adras.yml)
+## Demo Video
+
+[![Demo Video](https://img.youtube.com/vi/eHAeP_hQNOw/0.jpg)](https://youtu.be/eHAeP_hQNOw)
+
 
 ## Features
 
