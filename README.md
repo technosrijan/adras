@@ -7,7 +7,8 @@ FastAPI service that turns natural-language analysis requests into executable Py
 
 ## Demo Video
 
-[![Demo Video](https://img.youtube.com/vi/eHAeP_hQNOw/0.jpg)](https://youtu.be/eHAeP_hQNOw)
+
+🚀 **Check out the YouTube Demo!** 👉 [Watch the demo on YouTube](https://youtu.be/eHAeP_hQNOw)
 
 
 ## Features
